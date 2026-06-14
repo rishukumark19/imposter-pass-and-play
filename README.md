@@ -1,67 +1,46 @@
-# 🕵️ IMPOSTER — Offline Pass & Play Party Game
-
-A premium, high-fidelity social deduction word game built as a Progressive Web App (PWA) for phone viewports. Tailored for quick, high-energy rounds during office lunches or coffee breaks.
-
----
-
-## 🎯 Game Concept & Mechanics
-
-**Imposter** is a single-device offline facilitator:
-1. **The Setup:** Add player names and configure rules. Select a category (e.g., *Bangalore Life*, *Indian Food*, *Office Life*, or type a *Custom Joke*).
-2. **The Pass:** Pass the phone around. Each player holds down their finger to privately reveal their role and secret word.
-   - **Civilians** see the target word.
-   - **Imposters** see a decoy word (Classic mode) or `???` (Blind mode).
-3. **The Play:** The app suggests a random starting player. Players verbally share one-word clues and debate physically.
-4. **The Reveal:** Once voted out verbally, tap the Reveal button to show the truth!
+# 🕵️ IMPOSTER — Final Master Game Design Document (v2)
+> Synthesized from: GPT 2 · Claude 2 · Gemini 2 · Perplexity 2 · Antigravity  
+> **This is the single source of truth for the offline, pass-and-play party game.**
 
 ---
 
-## 📂 Features
+## 🎯 Product Vision & Core Principle
 
-- 📱 **Native Mobile Feel:** Styled with deep cyberpunk glassmorphism, responsive scales, and locks to `100dvh` viewports.
-- 🌳 **Bangalore & India Themes:** Localized packs including hotspots (Indiranagar vs Koramangala), food, Bollywood, and tech life.
-- 🔞 **18+ Spicy Mode:** Unlocks mature categories with a warning modal, shifting the app theme from electric purple to crimson red.
-- 🃏 **Inside Jokes Creator:** Input your own custom Civilian and Imposter word pairs for personalized team rounds.
-- 🔒 **Press-and-Hold Privacy:** Role card reveals only while pressing down, preventing adjacent peeking.
-- 💾 **Local Storage Persistence:** Keeps player names saved on the device between rounds.
+**Imposter** is a high-fidelity, offline-first party helper game built as an installable Progressive Web App (PWA) for phones. It is designed to be played around a single office lunch table by passing around **one single phone**.
 
----
-
-## 🛠️ Project Structure
-
-```
-app/
- ├── src/
- │    ├── context/
- │    │    └── GameContext.jsx   # Game reducer and state engine
- │    ├── data/
- │    │    └── wordPacks.js     # Categorized word pairs
- │    ├── screens/
- │    │    ├── HomeScreen       # Splash dashboard
- │    │    ├── SetupScreen      # Offline settings & player list
- │    │    ├── RevealScreen     # Hold-to-reveal private cards
- │    │    ├── PlayScreen       # Timer & speaking order list
- │    │    └── ResultsScreen    # Canvas confetti & role reveals
- │    ├── App.jsx               # Router & theme injector
- │    └── index.css             # Global dark-mode tokens
- └── index.html                 # Mobile-first meta viewports
-```
+### The Core Principle:
+> **The app is not the game master — the humans are.**
+> The app does not track scores, manage clue typing, or record in-app votes. It is purely a **secret word distributor + starter facilitator + final round reveal helper**. All social deduction, debates, accusations, and voting happen verbally in real life. This keeps the phone interactions fast, private, and seamless.
 
 ---
 
-## 🚀 Getting Started
+## 👥 Player Roles & Difficulty Settings
 
-To run the application locally:
+| Role | What They See | Their Goal |
+|---|---|---|
+| **Civilian** | The real word (e.g., `Indiranagar`) | Describe it with a one-word clue. Don't be too obvious! |
+| **Imposter** | Decoy word (e.g., `Koramangala`) OR nothing (`???`) | Guess the real word from clues, blend in, and survive. |
 
+### Difficulty Toggles:
+- **Classic (Easy):** Imposter receives a closely related decoy word (e.g., Civilian = `Biryani`, Imposter = `Pulao`).
+- **Blind / Mr. X (Hard):** Imposter receives no clue at all (displays `???`). They must listen closely to the first players' clues to adapt.
+- **Brutal:** Imposter receives a word from a completely different category, making blending in a supreme improvisational challenge.
+
+### Gameplay Variations:
+- **Double Imposter Mode:** Enforces 2 Imposters (automatically enabled or toggled for groups of 7+ players).
+- **Trick Round (No Imposter):** A paranoia-inducing setting where everyone gets the exact same civilian word, but players don't know if there is an imposter in the group.
+
+---
+
+## 🛠️ Stack & Architecture
+
+- **Framework:** React + TypeScript + Vite
+- **Styling:** Tailwind CSS v4 + SCSS for global glassmorphism and keyframe animations
+- **State:** Context API (`GameContext.tsx`)
+- **Animations:** Framer Motion
+
+To run the project locally:
 ```bash
-# Navigate to the app directory
-cd app
-
-# Install dependencies
 npm install
-
-# Run Vite dev server
 npm run dev
 ```
-
-Open the local link (typically `http://localhost:5173/`) on your mobile browser or use developer tools mobile simulation.

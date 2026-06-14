@@ -1,13 +1,23 @@
-/**
- * IMPOSTER — Word Packs (India & Bangalore Special Edition)
- * Each entry: [civilianWord, imposterWord]
- * Organized by category and content tier.
- */
+export interface CategoryPack {
+  name: string;
+  words: [string, string][];
+}
 
-const wordPacks = {
+export interface TierPacks {
+  [categoryId: string]: CategoryPack;
+}
+
+export interface WordPacks {
+  safe: TierPacks;
+  casual: TierPacks;
+  spicy: TierPacks;
+  unhinged: TierPacks;
+}
+
+const wordPacks: WordPacks = {
   safe: {
     bangalore: {
-      name: "🌳 Bangalore Life",
+      name: "🌳 Namma Bengaluru",
       words: [
         ["Indiranagar", "Koramangala"],
         ["Auto Driver", "Uber Driver"],
@@ -24,7 +34,7 @@ const wordPacks = {
       ],
     },
     indian_food: {
-      name: "🍛 Indian Food",
+      name: "🍛 Food Coma",
       words: [
         ["Biryani", "Pulao"],
         ["Masala Dosa", "Idli"],
@@ -39,7 +49,7 @@ const wordPacks = {
       ],
     },
     food: {
-      name: "🍕 General Food",
+      name: "🍕 Munchies",
       words: [
         ["Pizza", "Burger"],
         ["Pasta", "Noodles"],
@@ -50,7 +60,7 @@ const wordPacks = {
       ],
     },
     movies: {
-      name: "🎬 Movies & Shows",
+      name: "🎬 Binge Watch",
       words: [
         ["Avengers", "Justice League"],
         ["Interstellar", "Gravity"],
@@ -63,7 +73,7 @@ const wordPacks = {
       ],
     },
     tech: {
-      name: "💻 Tech Life",
+      name: "💻 Tech Bros",
       words: [
         ["iPhone", "Samsung Galaxy"],
         ["React", "Angular"],
@@ -76,7 +86,7 @@ const wordPacks = {
       ],
     },
     bollywood: {
-      name: "🎭 Bollywood",
+      name: "🎭 Desi Drama",
       words: [
         ["Shah Rukh Khan", "Salman Khan"],
         ["Deepika Padukone", "Priyanka Chopra"],
@@ -87,7 +97,7 @@ const wordPacks = {
       ],
     },
     office: {
-      name: "💼 Office Life",
+      name: "💼 9 to 5 Grind",
       words: [
         ["Standup", "Retro"],
         ["Deadline", "EOD"],
@@ -104,7 +114,7 @@ const wordPacks = {
   },
   casual: {
     dating: {
-      name: "💕 Dating & Relationships",
+      name: "💕 Swiping Right",
       words: [
         ["First Date", "Blind Date"],
         ["Crush", "Secret Admirer"],
@@ -115,7 +125,7 @@ const wordPacks = {
       ],
     },
     awkward: {
-      name: "😬 Awkward Moments",
+      name: "😬 Yikes",
       words: [
         ["Caught Staring", "Eye Contact"],
         ["Wrong Name", "Memory Blank"],
@@ -127,7 +137,7 @@ const wordPacks = {
   },
   spicy: {
     desi_spicy: {
-      name: "🌶️ 18+ Desi / Bangalore",
+      name: "🌶️ Desi Nights",
       words: [
         ["Arranged Marriage", "Tinder Date"],
         ["Kingfisher Premium", "Bira 91"],
@@ -142,7 +152,7 @@ const wordPacks = {
       ],
     },
     romance: {
-      name: "🔥 Spicy Romance",
+      name: "🔥 Getting Steamy",
       words: [
         ["Flirting", "Seducing"],
         ["Lingerie", "Swimwear"],
@@ -154,7 +164,7 @@ const wordPacks = {
   },
   unhinged: {
     chaos: {
-      name: "💀 Unhinged Chaos",
+      name: "💀 Pure Chaos",
       words: [
         ["OnlyFans", "Patreon"],
         ["Handcuffs", "Chains"],

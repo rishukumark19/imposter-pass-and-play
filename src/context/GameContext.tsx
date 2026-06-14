@@ -1,7 +1,6 @@
-import { createContext, useContext, useReducer, useCallback, useEffect } from "react";
-import wordPacks from "../data/wordPacks.js";
-
-const GameContext = createContext(null);
+import React, { createContext, useContext, useReducer, useCallback, useEffect } from "react";
+import type { ReactNode } from "react";
+import wordPacks from "../data/wordPacks";
 
 const AVATARS = [
   "🦊", "🐼", "🦁", "🐸", "🦄", "🐙", "🦋", "🐺",
@@ -15,26 +14,55 @@ export const PHASES = {
   REVEAL: "reveal",
   PLAY: "play",
   RESULTS: "results",
-};
+} as const;
 
-// Default players if localStorage is empty
-const DEFAULT_PLAYERS = [
+export type Phase = typeof PHASES[keyof typeof PHASES];
+
+export interface Player {
+  id: string;
+  name: string;
+  avatar: string;
+}
+
+export interface GameSettings {
+  contentMode: "safe" | "casual" | "spicy" | "unhinged";
+  difficulty: "classic" | "blind";
+  category: string;
+  imposterCount: number;
+  trickRound: boolean;
+  discussionTime: number;
+  customCivilianWord: string;
+  customImposterWord: string;
+}
+
+export interface GameState {
+  phase: Phase;
+  players: Player[];
+  settings: GameSettings;
+  currentRound: number;
+  realWord: string;
+  imposterWord: string;
+  imposterIds: string[];
+  starterPlayerId: string | null;
+  revealIndex: number;
+}
+
+const DEFAULT_PLAYERS: Player[] = [
   { id: "p_1", name: "Rahul", avatar: "🦊" },
   { id: "p_2", name: "Priya", avatar: "🐼" },
   { id: "p_3", name: "Amit", avatar: "🦁" },
   { id: "p_4", name: "Kiran", avatar: "🐸" },
 ];
 
-// ── Initial State ──
-const initialState = {
+const initialState: GameState = {
   phase: PHASES.HOME,
   players: [],
   settings: {
-    contentMode: "safe",       // safe | spicy (locks 18+ items)
-    difficulty: "classic",      // classic | blind
-    category: "bangalore",      // selected category key
+    contentMode: "safe",
+    difficulty: "classic",
+    category: "bangalore",
     imposterCount: 1,
-    trickRound: false,         // trick round (no imposter)
+    trickRound: false,
     discussionTime: 90,
     customCivilianWord: "",
     customImposterWord: "",
@@ -47,31 +75,50 @@ const initialState = {
   revealIndex: 0,
 };
 
-// ── Pick a word pair ──
-function pickWordPair(contentMode, category) {
-  // Find category in spicy or safe
-  let pool = null;
-  if (wordPacks.safe[category]) {
-    pool = wordPacks.safe[category].words;
-  } else if (wordPacks.casual[category]) {
-    pool = wordPacks.casual[category].words;
-  } else if (wordPacks.spicy[category]) {
-    pool = wordPacks.spicy[category].words;
-  } else if (wordPacks.unhinged[category]) {
-    pool = wordPacks.unhinged[category].words;
+type Action =
+  | { type: "SET_PHASE"; phase: Phase }
+  | { type: "LOAD_PLAYERS"; players: Player[] }
+  | { type: "ADD_PLAYER"; name: string }
+  | { type: "REMOVE_PLAYER"; id: string }
+  | { type: "REORDER_PLAYERS"; players: Player[] }
+  | { type: "UPDATE_SETTINGS"; settings: Partial<GameSettings> }
+  | { type: "START_ROUND" }
+  | { type: "NEXT_REVEAL" }
+  | { type: "END_REVEAL" }
+  | { type: "REVEAL_RESULTS" }
+  | { type: "PLAY_AGAIN" }
+  | { type: "RESET_GAME" };
+
+interface GameContextType {
+  state: GameState;
+  dispatch: React.Dispatch<Action>;
+  setPhase: (phase: Phase) => void;
+}
+
+const GameContext = createContext<GameContextType | null>(null);
+
+function pickWordPair(category: string): [string, string] {
+  let pool: [string, string][] | null = null;
+  const packs = wordPacks as any;
+  if (packs.safe[category]) {
+    pool = packs.safe[category].words;
+  } else if (packs.casual[category]) {
+    pool = packs.casual[category].words;
+  } else if (packs.spicy[category]) {
+    pool = packs.spicy[category].words;
+  } else if (packs.unhinged[category]) {
+    pool = packs.unhinged[category].words;
   }
 
-  // Fallback if not found
   if (!pool || pool.length === 0) {
-    pool = wordPacks.safe.bangalore.words;
+    pool = packs.safe.bangalore.words;
   }
 
-  const pair = pool[Math.floor(Math.random() * pool.length)];
+  const pair = pool![Math.floor(Math.random() * pool!.length)];
   return pair || ["Filter Coffee", "Starbucks Latte"];
 }
 
-// ── Shuffle ──
-function shuffle(arr) {
+function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -80,8 +127,7 @@ function shuffle(arr) {
   return a;
 }
 
-// ── Reducer ──
-function gameReducer(state, action) {
+function gameReducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case "SET_PHASE":
       return { ...state, phase: action.phase };
@@ -123,18 +169,16 @@ function gameReducer(state, action) {
         realWord = settings.customCivilianWord || "Filter Coffee";
         imposterWord = settings.customImposterWord || "Starbucks Latte";
       } else {
-        [realWord, imposterWord] = pickWordPair(settings.contentMode, settings.category);
+        [realWord, imposterWord] = pickWordPair(settings.category);
       }
 
-      // Determine Imposters
-      let imposterIds = [];
+      let imposterIds: string[] = [];
       if (!settings.trickRound) {
         const shuffled = shuffle(players);
         const count = Math.min(settings.imposterCount, players.length - 1);
         imposterIds = shuffled.slice(0, count).map((p) => p.id);
       }
 
-      // Select a random Civilian to start (or any player if trick round)
       const civilians = players.filter((p) => !imposterIds.includes(p.id));
       const starterList = civilians.length > 0 ? civilians : players;
       const starterPlayerId = starterList[Math.floor(Math.random() * starterList.length)].id;
@@ -171,10 +215,9 @@ function gameReducer(state, action) {
   }
 }
 
-export function GameProvider({ children }) {
+export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
-  // Load players from local storage on mount
   useEffect(() => {
     const saved = localStorage.getItem("imposter_players");
     if (saved) {
@@ -189,7 +232,7 @@ export function GameProvider({ children }) {
     }
   }, []);
 
-  const setPhase = useCallback((phase) => dispatch({ type: "SET_PHASE", phase }), []);
+  const setPhase = useCallback((phase: Phase) => dispatch({ type: "SET_PHASE", phase }), []);
 
   return (
     <GameContext.Provider value={{ state, dispatch, setPhase }}>
